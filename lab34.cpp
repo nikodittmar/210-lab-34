@@ -4,6 +4,8 @@
 #include <stack>
 #include <limits>
 #include <string>
+#include <algorithm> // For std::sort
+#include <functional> // Required for std::function
 using namespace std;
 
 const int SIZE = 9;
@@ -135,6 +137,78 @@ public:
         }
         cout << endl;
     }
+
+    void kruskalMST(const vector<string> &cityNames) {
+        vector<Edge> allEdges;
+        vector<Edge> mstEdges;
+
+        // Collect all edges
+        for (int i = 0; i < adjList.size(); i++) {
+            for (auto &neighbor : adjList[i]) {
+                if (i < neighbor.first) { // Avoid duplicate edges in an undirected graph
+                    allEdges.push_back({i, neighbor.first, neighbor.second});
+                }
+            }
+        }
+
+        // Sort edges by increasing capacity
+        sort(allEdges.begin(), allEdges.end(), [](Edge a, Edge b) {
+            return a.capacity < b.capacity;
+        });
+
+        // Union-Find structures
+        vector<int> parent(SIZE);
+        vector<int> rank(SIZE, 0);
+
+        // Initialize parent pointers
+        for (int i = 0; i < SIZE; i++) {
+            parent[i] = i;
+        }
+
+        
+        std::function<int(int)> find = [&](int v) -> int {
+            if (v != parent[v]) {
+                parent[v] = find(parent[v]); // Path compression
+            }
+            return parent[v];
+        };
+
+        auto unionSets = [&](int u, int v) {
+            int rootU = find(u);
+            int rootV = find(v);
+
+            if (rootU != rootV) {
+                if (rank[rootU] > rank[rootV]) {
+                    parent[rootV] = rootU;
+                } else if (rank[rootU] < rank[rootV]) {
+                    parent[rootU] = rootV;
+                } else {
+                    parent[rootV] = rootU;
+                    rank[rootU]++;
+                }
+            }
+        };
+
+        // Process edges for MST
+        for (auto &edge : allEdges) {
+            int u = edge.src;
+            int v = edge.dest;
+
+            if (find(u) != find(v)) {
+                mstEdges.push_back(edge);
+                unionSets(u, v);
+            }
+        }
+
+        // Output MST edges
+        cout << "Minimum Spanning Tree edges:\n";
+        cout << "================================\n";
+        for (auto &edge : mstEdges) {
+            cout << "Edge from " << cityNames[edge.src] << " to " << cityNames[edge.dest]
+                 << " with capacity: " << edge.capacity << " amps\n";
+        }
+        cout << endl;
+    }
 };
 
 int main() {
@@ -174,6 +248,8 @@ int main() {
     graph.BFS(0, cityNames);
 
     graph.dijkstra(0);
+
+    graph.kruskalMST(cityNames);
 
     return 0;
 }
