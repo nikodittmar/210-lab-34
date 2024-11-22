@@ -5,7 +5,7 @@
 #include <limits>
 #include <string>
 #include <algorithm> // For std::sort
-#include <functional> // Required for std::function
+#include <functional> // For std::function
 using namespace std;
 
 const int SIZE = 9;
@@ -165,7 +165,7 @@ public:
             parent[i] = i;
         }
 
-        
+        // Lambda function for finding the root of a set
         std::function<int(int)> find = [&](int v) -> int {
             if (v != parent[v]) {
                 parent[v] = find(parent[v]); // Path compression
@@ -173,6 +173,7 @@ public:
             return parent[v];
         };
 
+        // Lambda function for union of two sets
         auto unionSets = [&](int u, int v) {
             int rootU = find(u);
             int rootV = find(v);
@@ -242,14 +243,42 @@ int main() {
 
     Graph graph(edges);
 
-    graph.printGraph(cityNames);
+    while (true) {
+        cout << "Power Grid Network Menu:\n";
+        cout << "[1] Display power grid topology\n";
+        cout << "[2] Check Power Distribution Reach (BFS)\n";
+        cout << "[3] Plan inspection route  (DFS)\n";
+        cout << "[4] Calculate shortest paths\n";
+        cout << "[5] Find Minimum Spanning Tree\n";
+        cout << "[0] Exit\n";
+        cout << "Enter your choice: ";
 
-    graph.DFS(0, cityNames);
-    graph.BFS(0, cityNames);
+        int choice;
+        cin >> choice;
 
-    graph.dijkstra(0);
-
-    graph.kruskalMST(cityNames);
+        switch (choice) {
+            case 1:
+                graph.printGraph(cityNames);
+                break;
+            case 2:
+                graph.BFS(0, cityNames); // Assuming starting from node 0
+                break;
+            case 3:
+                graph.DFS(0, cityNames); // Assuming starting from node 0
+                break;
+            case 4:
+                graph.dijkstra(0); // Assuming starting from node 0
+                break;
+            case 5:
+                graph.kruskalMST(cityNames);
+                break;
+            case 0:
+                cout << "Exiting program. Goodbye!\n";
+                return 0;
+            default:
+                cout << "Invalid choice. Please try again.\n";
+        }
+    }
 
     return 0;
 }
