@@ -2,10 +2,12 @@
 #include <vector>
 #include <queue>
 #include <stack>
+#include <limits>
 #include <string>
 using namespace std;
 
 const int SIZE = 9;
+const int INF = numeric_limits<int>::max();
 
 struct Edge {
     int src, dest, capacity;
@@ -26,7 +28,7 @@ public:
             int capacity = edge.capacity;
 
             adjList[src].push_back(make_pair(dest, capacity));
-            adjList[dest].push_back(make_pair(src, capacity));
+            adjList[dest].push_back(make_pair(src, capacity)); // Undirected graph
         }
     }
 
@@ -100,23 +102,56 @@ public:
         }
         cout << endl;
     }
+
+    void dijkstra(int start) {
+        vector<int> dist(SIZE, INF);
+        priority_queue<Pair, vector<Pair>, greater<Pair>> pq;
+
+        dist[start] = 0;
+        pq.push({0, start});
+
+        while (!pq.empty()) {
+            int u = pq.top().second;
+            pq.pop();
+
+            for (auto &neighbor : adjList[u]) {
+                int v = neighbor.first;
+                int weight = neighbor.second;
+
+                if (dist[u] + weight < dist[v]) {
+                    dist[v] = dist[u] + weight;
+                    pq.push({dist[v], v});
+                }
+            }
+        }
+
+        // Output the shortest paths
+        cout << "Shortest path from node " << start << ":\n";
+        for (int i = 0; i < SIZE; i++) {
+            if (dist[i] == INF)
+                cout << start << " -> " << i << " : INF\n";
+            else
+                cout << start << " -> " << i << " : " << dist[i] << "\n";
+        }
+        cout << endl;
+    }
 };
 
 int main() {
     vector<Edge> edges = {
-        {0, 1, 800},
-        {0, 2, 2100},
-        {1, 2, 600},
-        {1, 3, 500},
-        {1, 4, 400},
-        {2, 7, 1100},
-        {2, 8, 800},
-        {3, 4, 900},
-        {6, 5, 1000},
-        {7, 5, 1500},
-        {5, 8, 500},
-        {6, 7, 300},
-        {6, 8, 700},
+        {0, 1, 8},
+        {0, 2, 21},
+        {1, 2, 6},
+        {1, 3, 5},
+        {1, 4, 4},
+        {2, 7, 11},
+        {2, 8, 8},
+        {3, 4, 9},
+        {6, 5, 10},
+        {7, 5, 15},
+        {5, 8, 5},
+        {6, 7, 3},
+        {6, 8, 7},
     };
 
     vector<string> cityNames = {
@@ -137,6 +172,8 @@ int main() {
 
     graph.DFS(0, cityNames);
     graph.BFS(0, cityNames);
+
+    graph.dijkstra(0);
 
     return 0;
 }
